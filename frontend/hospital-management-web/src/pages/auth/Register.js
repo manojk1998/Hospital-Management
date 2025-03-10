@@ -1,23 +1,31 @@
 import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 
 const Register = () => {
+    const { user, isAuthenticated, registerUser } = useContext(AuthContext);
+
+    // Initialize state at the top level, before any conditional returns
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
         email: '',
         password: '',
         confirm_password: '',
-        hospital_name: '',
-        hospital_type: 'private',
-        registration_number: '',
+        employee_id: '',
+        role: 'staff',
+        department: '',
+        date_of_joining: new Date().toISOString().split('T')[0]
     });
 
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const { registerUser } = useContext(AuthContext);
+    // Redirect if not authenticated or not an admin
+    if (!isAuthenticated || (user && user.role !== 'admin')) {
+        return <Navigate to="/" />;
+    }
 
     const handleChange = (e) => {
         setFormData({
@@ -29,6 +37,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setSuccess('');
 
         // Validate passwords match
         if (formData.password !== formData.confirm_password) {
@@ -42,10 +51,24 @@ const Register = () => {
             // Remove confirm_password before sending to API
             const { confirm_password, ...registerData } = formData;
             await registerUser(registerData);
+            setSuccess('Staff member registered successfully!');
+
+            // Reset form
+            setFormData({
+                first_name: '',
+                last_name: '',
+                email: '',
+                password: '',
+                confirm_password: '',
+                employee_id: '',
+                role: 'staff',
+                department: '',
+                date_of_joining: new Date().toISOString().split('T')[0]
+            });
         } catch (err) {
             setError(
                 err.response?.data?.detail ||
-                'Registration failed. Please check your information and try again.'
+                'Registration failed. Please check the information and try again.'
             );
         } finally {
             setIsLoading(false);
@@ -59,14 +82,20 @@ const Register = () => {
                     <div className="card shadow">
                         <div className="card-body p-5">
                             <div className="text-center mb-4">
-                                <i className="fas fa-hospital text-primary" style={{ fontSize: '3rem' }}></i>
-                                <h2 className="mt-3">Create an Account</h2>
-                                <p className="text-muted">Register your hospital</p>
+                                <i className="fas fa-user-plus text-primary" style={{ fontSize: '3rem' }}></i>
+                                <h2 className="mt-3">Register New Staff Member</h2>
+                                <p className="text-muted">Add a new staff member to the system</p>
                             </div>
 
                             {error && (
                                 <div className="alert alert-danger" role="alert">
                                     {error}
+                                </div>
+                            )}
+
+                            {success && (
+                                <div className="alert alert-success" role="alert">
+                                    {success}
                                 </div>
                             )}
 
@@ -141,48 +170,65 @@ const Register = () => {
                                 </div>
 
                                 <hr className="my-4" />
-                                <h5>Hospital Information</h5>
+                                <h5>Staff Information</h5>
 
-                                <div className="mb-3">
-                                    <label htmlFor="hospital_name" className="form-label">Hospital Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="hospital_name"
-                                        name="hospital_name"
-                                        value={formData.hospital_name}
-                                        onChange={handleChange}
-                                        required
-                                    />
+                                <div className="row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="employee_id" className="form-label">Employee ID</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="employee_id"
+                                            name="employee_id"
+                                            value={formData.employee_id}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="role" className="form-label">Role</label>
+                                        <select
+                                            className="form-select"
+                                            id="role"
+                                            name="role"
+                                            value={formData.role}
+                                            onChange={handleChange}
+                                            required
+                                        >
+                                            <option value="staff">Staff</option>
+                                            <option value="admin">Administrator</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
-                                        <label htmlFor="hospital_type" className="form-label">Hospital Type</label>
+                                        <label htmlFor="department" className="form-label">Department</label>
                                         <select
                                             className="form-select"
-                                            id="hospital_type"
-                                            name="hospital_type"
-                                            value={formData.hospital_type}
+                                            id="department"
+                                            name="department"
+                                            value={formData.department}
                                             onChange={handleChange}
                                             required
                                         >
-                                            <option value="government">Government</option>
-                                            <option value="private">Private</option>
-                                            <option value="non_profit">Non-Profit</option>
-                                            <option value="research">Research</option>
-                                            <option value="teaching">Teaching</option>
+                                            <option value="">Select Department</option>
+                                            <option value="1">Sales</option>
+                                            <option value="2">Support</option>
+                                            <option value="3">Technical</option>
+                                            <option value="4">Management</option>
                                         </select>
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <label htmlFor="registration_number" className="form-label">Registration Number</label>
+                                        <label htmlFor="date_of_joining" className="form-label">Date of Joining</label>
                                         <input
-                                            type="text"
+                                            type="date"
                                             className="form-control"
-                                            id="registration_number"
-                                            name="registration_number"
-                                            value={formData.registration_number}
+                                            id="date_of_joining"
+                                            name="date_of_joining"
+                                            value={formData.date_of_joining}
                                             onChange={handleChange}
                                             required
                                         />
@@ -200,15 +246,16 @@ const Register = () => {
                                             Registering...
                                         </>
                                     ) : (
-                                        'Register'
+                                        'Register Staff Member'
                                     )}
                                 </button>
                             </form>
 
                             <div className="text-center mt-4">
-                                <p>
-                                    Already have an account? <Link to="/login" className="text-primary">Sign In</Link>
-                                </p>
+                                <Link to="/" className="btn btn-outline-secondary">
+                                    <i className="fas fa-arrow-left me-2"></i>
+                                    Back to Dashboard
+                                </Link>
                             </div>
                         </div>
                     </div>

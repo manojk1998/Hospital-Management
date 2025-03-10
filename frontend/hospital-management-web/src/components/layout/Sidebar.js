@@ -72,6 +72,15 @@ const Sidebar = ({ isOpen, userRole }) => {
                         Profile
                     </Link>
                 </li>
+
+                {isAdmin && (
+                    <li className="sidebar-menu-item">
+                        <Link to="/register">
+                            <i className="fas fa-user-plus"></i>
+                            Register Staff
+                        </Link>
+                    </li>
+                )}
             </ul>
         </div>
     );

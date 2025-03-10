@@ -16,7 +16,16 @@ const Login = () => {
         setIsLoading(true);
 
         try {
-            await loginUser(email, password);
+            const response = await loginUser(email, password);
+            console.log(response);
+            // Check if user is a client
+            if (response && response.user && response.user.role === 'client') {
+                setError('Client access is not allowed. Please contact the administrator.');
+                // Logout the user
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+                window.location.reload();
+            }
         } catch (err) {
             setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
         } finally {
@@ -33,7 +42,7 @@ const Login = () => {
                             <div className="text-center mb-4">
                                 <i className="fas fa-hospital text-primary" style={{ fontSize: '3rem' }}></i>
                                 <h2 className="mt-3">Hospital Instrument Management</h2>
-                                <p className="text-muted">Sign in to your account</p>
+                                <p className="text-muted">Staff Login</p>
                             </div>
 
                             {error && (
@@ -96,8 +105,8 @@ const Login = () => {
                             </form>
 
                             <div className="text-center mt-4">
-                                <p>
-                                    Don't have an account? <Link to="/register" className="text-primary">Register</Link>
+                                <p className="text-muted">
+                                    This system is for company staff only. Client access is restricted.
                                 </p>
                             </div>
                         </div>

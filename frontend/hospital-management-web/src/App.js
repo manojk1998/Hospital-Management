@@ -42,8 +42,18 @@ function App() {
         const checkAuthentication = async () => {
             try {
                 const response = await checkAuth();
-                setIsAuthenticated(true);
-                setUser(response.data);
+
+                // Check if user is a client
+                if (response.data && response.data.role === 'client') {
+                    // Client access is not allowed
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refreshToken');
+                    setIsAuthenticated(false);
+                    setUser(null);
+                } else {
+                    setIsAuthenticated(true);
+                    setUser(response.data);
+                }
             } catch (error) {
                 setIsAuthenticated(false);
                 setUser(null);
@@ -75,7 +85,13 @@ function App() {
                         <Routes>
                             {/* Public Routes */}
                             <Route path="/login" element={!isAuthenticated ? <Login setAuth={setIsAuthenticated} setUser={setUser} /> : <Navigate to="/" />} />
-                            <Route path="/register" element={!isAuthenticated ? <Register setAuth={setIsAuthenticated} setUser={setUser} /> : <Navigate to="/" />} />
+
+                            {/* Admin Only Routes */}
+                            <Route path="/register" element={
+                                isAuthenticated && user?.role === 'admin' ?
+                                    <Register /> :
+                                    <Navigate to={isAuthenticated ? "/" : "/login"} />
+                            } />
 
                             {/* Private Routes */}
                             <Route path="/" element={<PrivateRoute isAuthenticated={isAuthenticated}><Dashboard /></PrivateRoute>} />
@@ -88,9 +104,17 @@ function App() {
                             <Route path="/clients" element={<PrivateRoute isAuthenticated={isAuthenticated}><ClientsList /></PrivateRoute>} />
                             <Route path="/clients/:id" element={<PrivateRoute isAuthenticated={isAuthenticated}><ClientDetails /></PrivateRoute>} />
 
-                            {/* Staff Routes */}
-                            <Route path="/staff" element={<PrivateRoute isAuthenticated={isAuthenticated}><StaffList /></PrivateRoute>} />
-                            <Route path="/staff/:id" element={<PrivateRoute isAuthenticated={isAuthenticated}><StaffDetails /></PrivateRoute>} />
+                            {/* Staff Routes - Admin Only */}
+                            <Route path="/staff" element={
+                                isAuthenticated && user?.role === 'admin' ?
+                                    <StaffList /> :
+                                    <Navigate to="/" />
+                            } />
+                            <Route path="/staff/:id" element={
+                                isAuthenticated && user?.role === 'admin' ?
+                                    <StaffDetails /> :
+                                    <Navigate to="/" />
+                            } />
 
                             {/* Orders Routes */}
                             <Route path="/orders" element={<PrivateRoute isAuthenticated={isAuthenticated}><OrdersList /></PrivateRoute>} />
