@@ -10,6 +10,34 @@ class IsAdmin(permissions.BasePermission):
         return request.user and (request.user.is_superuser or request.user.is_admin)
 
 
+class IsAdminUser(permissions.BasePermission):
+    """
+    Custom permission to only allow admin users to access the view.
+    Alias for IsAdmin for consistency with other permission naming.
+    """
+    
+    def has_permission(self, request, view):
+        return request.user and (request.user.is_superuser or request.user.is_admin)
+
+
+class IsStaffUser(permissions.BasePermission):
+    """
+    Custom permission to only allow staff users to access the view.
+    """
+    
+    def has_permission(self, request, view):
+        return request.user and request.user.is_staff_member
+
+
+class IsClientUser(permissions.BasePermission):
+    """
+    Custom permission to only allow client users to access the view.
+    """
+    
+    def has_permission(self, request, view):
+        return request.user and request.user.is_client
+
+
 class IsAdminOrSelf(permissions.BasePermission):
     """
     Custom permission to only allow admin users or the user themselves to access their data.

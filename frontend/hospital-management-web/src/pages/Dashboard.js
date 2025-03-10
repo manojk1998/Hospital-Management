@@ -19,7 +19,7 @@ const Dashboard = () => {
         revenue: 0
     });
     const [recentOrders, setRecentOrders] = useState([]);
-    const [dashboard, setDashboard] = useState(null);
+    const [dashboardConfig, setDashboardConfig] = useState(null);
 
     const instrumentChartRef = useRef(null);
     const revenueChartRef = useRef(null);
@@ -32,7 +32,7 @@ const Dashboard = () => {
             try {
                 // Fetch dashboard configuration
                 const dashboardResponse = await getDefaultDashboard();
-                setDashboard(dashboardResponse.data);
+                setDashboardConfig(dashboardResponse.data);
 
                 // Fetch instruments stats
                 const instrumentsResponse = await getInstruments();
