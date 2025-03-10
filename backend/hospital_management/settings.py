@@ -110,6 +110,21 @@ if os.getenv('DB_ENGINE') == 'postgresql':
             'PORT': os.getenv('DB_PORT', '5432'),
         }
     }
+
+elif os.getenv('DB_ENGINE') == 'mysql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('DB_NAME', 'hospital_management'),
+            'USER': os.getenv('DB_USER', 'root'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '3306'),
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            }
+        }
+    }
 else:
     DATABASES = {
         'default': {
